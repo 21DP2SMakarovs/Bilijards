@@ -24,12 +24,18 @@
     <ClCompile Include="nuja.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="deltatime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bumba.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="nuja.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deltatime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "bumba.h"
 #include "nuja.h"
+#include "deltatime.h"
 
 
 #define PI 3.14159
@@ -19,11 +20,10 @@ sf::Vector2f calculateVelocityDir(nuja& nuja, bumba& cueball, sf::RenderWindow& 
 
 int main() {
 
-	sf::RenderWindow window(sf::VideoMode(1250, 800), "Davai strada", sf::Style::Titlebar | sf::Style::Close);
+	sf::RenderWindow window(sf::VideoMode(1250, 800), "Super Crazy 8 Ball Pool ( BUG = FEATURE )", sf::Style::Titlebar | sf::Style::Close);
 	sf::Event e;
 	
-	sf::Clock DeltaClock;
-	sf::Time frameTime;
+
 
 	//colors
 	sf::Color white(255, 255, 255, 255);
@@ -65,47 +65,47 @@ int main() {
 	//TextureTable.setSize(sf::Vector2f(1051, 600));
 
 
-
-	
-	/*sf::RectangleShape Table; // Playground Table
-	Table.setFillColor(green);
-	Table.setPosition(sf::Vector2f(179, 177));
-	Table.setSize(sf::Vector2f(889, 450)); //x1 = 179, y1 = 177 | x2 = 1068, y2 = 627
-	Table.setOutlineColor(green); */
-	//sf::Font font;
-	//font.loadFromFile("C:/Windows/Fonts/arial.ttf");
-	
-	/*sf::Texture galdaBilde; // Table Image
-	galdaBilde.loadFromFile("C:/Users/Bracka/source/repos/Sfmltry2/media/galds.jpg");  ar shito es velak tiksu gala
-	sf::Sprite galds(galdaBilde);
-	galds.setPosition(55, 50);
-	galds.setScale(sf::Vector2f(1.2, 1.2)); */
-
 	//cue stuff
 	nuja cue(sf::Vector2f(200, 200), "cue.png");
 
 	//ball stuff
 	
 	bumba cueball(sf::Vector2f(300, 400), true);
-	
 	bumba ball1(sf::Vector2f(755, 400));
 	bumba ball2(sf::Vector2f(755 + 21, 400 + 11));
 	bumba ball3(sf::Vector2f(755 + 21, 400 - 11));
 	bumba ball4(sf::Vector2f(755 + 41, 400 + 22));
 	bumba ball5(sf::Vector2f(755 + 41, 400));
+	bumba ball6(sf::Vector2f(755 + 41, 400 - 22));
+	bumba ball7(sf::Vector2f(755 + 61, 400 + 33));
+	bumba ball8(sf::Vector2f(755 + 61, 400 + 11));
+	bumba ball9(sf::Vector2f(755 + 61, 400 - 11));
+	bumba ball10(sf::Vector2f(755 + 61, 400 - 33));
+	bumba ball11(sf::Vector2f(755 + 81, 400 + 44));
+	bumba ball12(sf::Vector2f(755 + 81, 400 + 22));
+	bumba ball13(sf::Vector2f(755 + 81, 400));
+	bumba ball14(sf::Vector2f(755 + 81, 400 - 22));
+	bumba ball15(sf::Vector2f(755 + 81, 400 - 44));
 
-	std::vector<bumba> b = {
-		cueball,
-		ball1,
-		ball2,
-		ball3,
-		ball4,
-		ball5
-	};
-	
 
+	std::vector<bumba> b;
 
-
+	b.push_back(cueball);
+	b.push_back(ball1);
+	b.push_back(ball2);
+	b.push_back(ball3);
+	b.push_back(ball4);
+	b.push_back(ball5);
+	b.push_back(ball6);
+	b.push_back(ball7);
+	b.push_back(ball8);
+	b.push_back(ball9);
+	b.push_back(ball10);
+	b.push_back(ball11);
+	b.push_back(ball12);
+	b.push_back(ball13);
+	b.push_back(ball14);
+	b.push_back(ball15);
 
 
 
@@ -115,7 +115,7 @@ int main() {
 
 	
 
-
+	deltatime dClock;
 
 	while (window.isOpen()) { // window is open
 		while (window.pollEvent(e)) { // e = event | event processing 
@@ -130,6 +130,9 @@ int main() {
 		}
 
 		window.clear(); //clear everything
+		
+
+
 		window.draw(background, 4, sf::Quads); // draw background
 
 		//table stuff
@@ -143,31 +146,48 @@ int main() {
 		
 		//balls
 
-
+		bool is_in_hole = false;
 
 		for (int i = 0; i < b.size(); i++) {
-
 			b[i].draw(window);
-			b[i].update(calculateVelocityDir(cue, b[0], window));
+			b[i].update(calculateDir(b[0], window));
 			for (int j = 0; j < b.size(); j++) {
 				if (j != i) {
 					b[i].collision(b[j]);
 				}
+
 			}
-			cue.setPos(calculatePoint(b[0], window));
-			cue.rotate(calculateDir(b[0], window));
-
-			
-
-
 		}
+		b[0].update(calculateDir(b[0], window));
+		
+		
+		bool yes = false;
+		int counter = 0;
+		for (auto& it : b) {
+			if (it.inHole()) {
+				it.setPos(sf::Vector2f(0,- 0));
+				yes = true;
+				break;
+			}
+			counter++;
+		}
+		if (yes) {
+			b.erase(b.begin() + counter);
+			yes = false;
+		}
+		
+		
 
+		
+		
+
+
+
+		//debug centrs
 		sf::CircleShape punkts;
 		punkts.setRadius(1.0f);
 		punkts.setFillColor(sf::Color::Red);
 		punkts.setPosition(sf::Vector2f(b[0].getPos().x + 9, b[0].getPos().y + 9));
-
-
 
 		bool state = true;
 
@@ -179,24 +199,19 @@ int main() {
 			
 		}
 
-
-
-		if (state) {
+		if (state) {	
+			cue.setPos(calculatePoint(b[0], window));
+			cue.rotate(calculateDir(b[0], window));
 			cue.draw(window);
 		}
 
-		//cue
-		//cue.draw(window);
-
-		//cue.setPos(calculatePoint(cueball, window));
-		//cue.rotate(calculateDir(cueball, window));
-
-		//calculateDir(cueball, window);
-		//calculatePoint(cueball, window);
-
 		window.draw(punkts);
 		window.display();
-		sf::Time frameTime = DeltaClock.restart();
+		dClock.update();
+		float secs = dClock.getSecs();
+		for (int i = 0; i < b.size(); i++) {
+			b[i].changeSecs(secs);
+		}
 	}
 
 	
@@ -206,8 +221,8 @@ int main() {
 // define func
 float calculateDir(bumba& cueball, sf::RenderWindow& window) {
 	
-	float x1 = cueball.getPos().x + 10;
-	float y1 = cueball.getPos().y + 10;
+	float x1 = cueball.getPos().x + 9;
+	float y1 = cueball.getPos().y + 9;
 	float x2 = sf::Mouse::getPosition(window).x;
 	float y2 = sf::Mouse::getPosition(window).y;
 
@@ -236,8 +251,10 @@ sf::Vector2f calculatePoint(bumba& cueball, sf::RenderWindow& window) {
 
 sf::Vector2f calculateVelocityDir(nuja& nuja, bumba& cueball, sf::RenderWindow& window) {
 
+
 	float x1 = cueball.getPos().x + 10;
 	float y1 = cueball.getPos().y + 10;
+	std::cout << "ball pos - " << x1 << " " << y1;
 	float x2 = sf::Mouse::getPosition(window).x;
 	float y2 = sf::Mouse::getPosition(window).y;
 

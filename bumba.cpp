@@ -1,8 +1,9 @@
 #include "bumba.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "deltatime.h"
 
-
+#define PI 3.14159
 
 
 
@@ -16,67 +17,71 @@ bumba::bumba(sf::Vector2f pos, bool cball) {
 	velocity.y = 0;
 	if (cball) {
 		cue_ball = true;
-		std::cout << "True";
+		
 	}
 
 }
 
-bool bumba::collision(bumba &b) {
-	float dist = sqrtf((b.position.x - position.x) * (b.position.x - position.x) + (b.position.y - position.y) * (b.position.y - position.y));
+void bumba::changeSecs(float sec) {
+	this->secs = sec;
+}
+
+
+float calculateDir(float x1, float y1, float x2, float y2) {
+
+
+	float radian = atan2f(y2 - y1, x2 - x1);
+	float deg = radian * 180 / PI;
+	//std::cout << deg << std::endl;
+
+	return deg;
+}
+
+
+bool bumba::inHole() {
 	bool value = false;
-	if (dist <= 18) {
+	if ((this->position.x - 168) * (this->position.x - 168) + (this->position.y - 165) * (this->position.y - 165) <= 28*28)
+		value = true;
+	else if ((this->position.x - 629) * (this->position.x - 629) + (this->position.y - 151) * (this->position.y - 151) <= 24 * 24)
+		value = true;
+	else if ((this->position.x - 1085) * (this->position.x - 1085) + (this->position.y - 165) * (this->position.y - 165) <= 28 * 28)
+		value = true;
+	else if (((this->position.x - 168) * (this->position.x - 168) + (this->position.y - 638) * (this->position.y - 638) <= 28 * 28))
+		value = true;
+	else if ((this->position.x - 629) * (this->position.x - 629) + (this->position.y - 649) * (this->position.y - 649) <= 24 * 24)
+		value = true;
+	else if (((this->position.x - 1085) * (this->position.x - 1085) + (this->position.y - 638) * (this->position.y - 638) <= 28 * 28))
+		value = true;
+	else
+		value = false;
+	return value;
+}
 
 
-		//std::cout << "Collision" << std::endl;
-		if (b.velocity.x * velocity.x > 0)
-		{
-			float vel2 = b.velocity.x; 
-			float vel1 = velocity.x;
-			b.velocity.x = b.velocity.x + vel1;
-			velocity.x = velocity.x - vel2;
 
-			
-		}
-		else if (b.velocity.x * velocity.x < 0)
-		{
-			float vel2;
-			vel2 = b.velocity.x;
-			b.velocity.x = velocity.x;
-			velocity.x = vel2;
+bool bumba::collision(bumba &b) {
 
-		}
-		else if (b.velocity.x == 0)
-		{
-			b.velocity.x = velocity.x;
-			velocity.x = 0;
-
-		}
-		if (b.velocity.y * velocity.y > 0)
-		{
-			float vel2 = b.velocity.y;
-			float vel1 = velocity.y;
-			b.velocity.y = b.velocity.y + vel1;
-			velocity.y = velocity.y - vel2;
-			
-		}
-		else if (b.velocity.y * velocity.y < 0)
-		{
-			float vel2;
-			vel2 = b.velocity.y;
-			b.velocity.y = velocity.y;
-			velocity.y = vel2;
-
-		}
-		else if (b.velocity.y == 0)
-		{
-			b.velocity.y = velocity.y;
-			velocity.y = 0;
-
-		}
+	bool value = false;
+	if (collisionV2(b)) {
+		b.angle = calculateDir(this->position.x + 9, this->position.y + 9, b.position.x + 9, b.position.y + 9);
+		
+		b.speed = this->speed;
 
 		value = true;
 	}
 	return value;
+}
+
+bool bumba::collisionV2(bumba& b)
+{
+	float dist_x = (this->position.x + 9) - (b.position.x + 9);
+	float dist_y = (this->position.y + 9) - (b.position.y + 9);
+	float radi_sum = this->radius + b.radius;
+		
+	if (dist_x * dist_x + dist_y * dist_y <= radi_sum * radi_sum) 
+		return true;
+
+	return false;
 }
 
 
@@ -84,20 +89,20 @@ bool bumba::collision(bumba &b) {
 
 
 void bumba::draw(sf::RenderWindow& window) {
-	window.draw(ball);
+	window.draw(this->ball);
 }
 
 sf::Vector2f bumba::getPos() {
-	return sf::Vector2f(position.x, position.y);
+	return sf::Vector2f(this->position.x, this->position.y);
 }
 
 sf::Vector2f bumba::getVel() {
-	return sf::Vector2f(velocity.x, velocity.y);
+	return sf::Vector2f(this->velocity.x, this->velocity.y);
 }
 
 bool bumba::isMoving() {
 	bool isMoving;
-	if (velocity.x == 0.00000f && velocity.y == 0.00000f) {
+	if (this->velocity.x == 0.00000f && this->velocity.y == 0.00000f) {
 		isMoving = false;
 	}
 	else {
@@ -107,52 +112,25 @@ bool bumba::isMoving() {
 }
 
 
-void bumba::move(float power) { //deaccleration
+void bumba::move() { //deaccleration
 
-
-	//std::cout << "TIME" << x << std::endl;
 
 	
-	if (velocity.x > 0)
-	{
-		velocity.x = velocity.x - 50 * secs; // velocity - decrease Value * delta time (less value of dValue = higher power)
-		velocity.x = (velocity.x >= 7.0f) ? 6.0f: velocity.x;
-		if (velocity.x < 0)
-		{
-			velocity.x = 0;
-		}
+	if (this->speed > 0) {
+		this->speed -= 0.0065;
+		this->velocity.x = this->speed * cos(this->angle * PI / 180);
+		this->velocity.y = this->speed * sin(this->angle * PI / 180);
+		
+		
 	}
-	if (velocity.y > 0)
-	{
+	else {
+		this->speed = 0;
+		this->velocity = sf::Vector2f(0, 0);
+	}
 
-		velocity.y = velocity.y - 50 * secs;
-		velocity.y = (velocity.y >= 7.0f) ? 6.0f : velocity.y;
-		if (velocity.y < 0)
-		{
-			velocity.y = 0;	
-		}
-	}
-	if (velocity.x < 0)
-	{
-		velocity.x = velocity.x + 50 * secs;
-		velocity.x = (velocity.x <= -7.0f) ? -6.0f : velocity.x;
-		if (velocity.x > 0)
-		{
-			velocity.x = 0;
-		}
-	}
-	if (velocity.y < 0)
-	{
-		velocity.y = velocity.y + 50 * secs;
-		velocity.y = (velocity.y <= -7.0f) ? -6.0f : velocity.y;
-		if (velocity.y > 0)
-		{
-			velocity.y = 0;
-		}
-	}
 }
 
-void bumba::update(sf::Vector2f vel) {
+void bumba::update(float angle) {
 
 	sf::Clock Deltaclock;
 	secs = Deltaclock.getElapsedTime().asSeconds();
@@ -163,62 +141,68 @@ void bumba::update(sf::Vector2f vel) {
 	if (cue_ball)
 	{//key events for movement
 		
-
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
 		{
-			//velocity.y = -5.0f;
-			velocity.x = -vel.x;
-			velocity.y = -vel.y;
+			this->speed = 4.5f;
+			this->angle = angle + 180;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
 		{
-			velocity.y = 5.0f;
+			this->speed = 3;
+			this->angle = 90;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
 		{
-			velocity.x = -5.0f;
+			this->speed = 3;
+			this->angle = 180;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
 		{
-			velocity.x = 5.0f;
+			this->speed = 3;
+			this->angle = 0;
 		}
 	}
 
 	//board_and_ball collission //x1 = 179, y1 = 177 | x2 = 1068, y2 = 627
-	if (position.x <= 179.0f)
+
+
+	if (position.x <= 179.0f && position.y >= 192.0f && position.y <= 590.0f) // kreisi
 	{
 
-		position.x = 180.0f;
-		velocity.x = -velocity.x;
+		position.x = 183.0f;
+		this->angle = 180 - this->angle;
 	}
-	else if (position.y <= 177.0f)
-	{
-		position.y = 178.0f;
-		velocity.y = -velocity.y;
+	else if (position.y <= 177.0f && position.x >= 195.0f && position.x <= 595.0f) { // augsa 1
+		position.y = 181.0f;
+		this->angle = -this->angle;
 	}
-	else if (position.y >= 605.0f)
-	{
-		position.y = 604.0f;
-		velocity.y = -velocity.y;
+	else if (position.y <= 177.0f && position.x <= 1040.0f && position.x >= 640.0f) { // augsa 2
+		position.y = 181.0f;
+		this->angle = -this->angle;
 	}
-	else if (position.x >= 1045.0f)
+	else if (position.y >= 605.0f && position.x >= 195.0f && position.x <= 595.0f) { // apaksa 1
+		position.y = 601.0f;
+		this->angle = -this->angle;
+	}
+	else if (position.y >= 605.0f && position.x <= 1040.0f && position.x >= 640.0f) { // apaksa 2
+		position.y = 601.0f;
+		this->angle = -this->angle;
+	}
+	else if (position.x >= 1045.0f && position.y >= 192.0f && position.y <= 589.0f) // labi
 	{
-		position.x = 1044.0f;
-		velocity.x = -velocity.x;
+		position.x = 1041.0f;
+		this->angle = 180 - this->angle;
 	}
 
-	//if (cue_ball) {
-	//	std::cout << "vel.x - " << velocity.x << " vel.y - " << velocity.y << " clock: " << secs << std::endl;
-	//}
-	std::cout << "vel.x - " << velocity.x << " vel.y - " << velocity.y << " clock: " << secs << std::endl;
+	
 	position = position + velocity;
 	ball.setPosition(position);
-
-	secs = Deltaclock.restart().asSeconds();
 	move();
 }
 
-
+void bumba::setPos(sf::Vector2f pos) {
+	this->position = pos;
+}
 
 
 

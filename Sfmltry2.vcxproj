@@ -148,11 +148,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bumba.cpp" />
+    <ClCompile Include="deltatime.cpp" />
     <ClCompile Include="nuja.cpp" />
     <ClCompile Include="Sfmltry2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bumba.h" />
+    <ClInclude Include="deltatime.h" />
     <ClInclude Include="nuja.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
