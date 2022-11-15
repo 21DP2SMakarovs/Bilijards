@@ -7,7 +7,6 @@ Labakais bilijards pasaulē:
  2. 10/10 Hole detection
  3. Tu esi kruts = Es esmu kruts
  
-Kā spēlēt?
- - Simple as breath: 
-  1. Arrow key up - Sist bumbu ( sākumā mēģini nomērķēt )
+Kā spēlēt? ( Simple as breath )
+ - Arrow key up - Sist bumbu ( sākumā mēģini nomērķēt )
   
