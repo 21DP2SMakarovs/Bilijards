@@ -1,5 +1,5 @@
 # Bilijards
-Versija V1.0
+Versija V1.1
 ---
 
 Labakais bilijards pasaulē:
