@@ -8,6 +8,6 @@ Labakais bilijards pasaulē:
  3. Tu esi kruts = Es esmu kruts
  
 Kā spēlēt?
- - Simple as breath:
-  - Arrow key up - Sist bumbu ( sākumā mēģini nomērķēt )
+ - Simple as breath: 
+  1. Arrow key up - Sist bumbu ( sākumā mēģini nomērķēt )
   
